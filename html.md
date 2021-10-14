@@ -91,3 +91,30 @@
 
 在屏幕小于等于500px情况下，图片显示成400px宽，选取`2.png`；在屏幕小于等于900px情况下，图片显示成700px宽，选取`1.jpg`；其余情况显示成1200px宽，还是选取`1.jpg`。
 
+## postMessage
+
+> 用于跨页面传递消息
+
+```html
+<!------iframe.html------->
+<body>
+  <div>111111</div>
+  <iframe src="./iframe2.html" frameborder="0" id="myIframe"></iframe>
+</body>
+<script>
+  const myIframe = document.getElementById('myIframe')
+  myIframe.onload= () => myIframe.contentWindow.postMessage('q11111')
+  const fn = (e) => console.log('parent',e)
+  window.addEventListener('message', fn, false)
+</script>
+<!------iframe2.html------->
+<body>
+  <h1>22222</h1>
+</body>
+<script>
+  const fn = (e) => console.log('son',e)
+  window.addEventListener('message', fn, false)
+  parent.postMessage({msg:'sonPage'},'*')
+</script>
+```
+
