@@ -112,7 +112,36 @@ Array.prototype.isPrototypeOf([1])
 
 ### new
 
+1. 创建一个新的对象
+2. 将新对象的原型指向构造函数的`prototype`
+3. 将构造函数的`this`指向新对象，并执行
+4. 判断返回值，如果为引用数据类型，返回引用类型对象
+
+```js
+function myNew(){
+    const constructor = Array.prototype.shift(arguments)
+    const newObj = Object.create(constructor.prototype)
+    const result = constructor.call(newObj,arguments)
+    const flag = result && 
+          (typeof result === 'object' ||typeof result === 'function')
+    return flag ? result : newObj
+}
+myNew(构造函数, 初始化参数);
+```
+
 ### extend
 
+### 隐式转换
 
+> 在使用==时，JS会自动将两边的数据类型进行转换，再比较
+
+规则：会尽量将数据类型变为number
+
+1. Object -> String -> Number
+2. Boolean -> Number
+
+> JS中每个值都自带一个toPrimitive方法`ToPrimitive(obj,type)`
+>
+> 1. 当期望`type`为`number`时，会先调用valueOf方法获取原始值，如没有调用`toString`方法，如没有抛出异常
+> 2. 当期望`type`为`string`时，会先调用`toString`方法获取原始值，如没有调用`valueOf`方法，如没有抛出异常
 
