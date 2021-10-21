@@ -1,8 +1,12 @@
-### 数据类型
+## JS基础
 
 > 基本数据类型：string，number，boolean，undefined，null，symbol，bigInt
 >
 > 引用数据类型：object（Date，Array，Function...）
+
+### symbol
+
+
 
 ### 区别
 
@@ -203,7 +207,7 @@ Child.prototype = Object.create(Parent.prototype)
 var child1 = new Child('child1')
 ```
 
-#### class
+#### class(es6)
 
 > ***原理等于寄生组合式继承***
 
@@ -236,12 +240,12 @@ var child1 = new Child('child1')
 规则：会尽量将数据类型变为number
 
 1. Object -> String -> Number
-2. Boolean -> Number
+2. Boolean -> Number      ***`undefined 、null 、NaN 、''、0会被转成false`***
 
 > JS中每个值都自带一个ToPrimitive方法`ToPrimitive(obj,type)`
 >
-> 1. 当期望`type`为`number`时，会先调用valueOf方法获取原始值，如没有调用`toString`方法，如没有抛出异常
-> 2. 当期望`type`为`string`时，会先调用`toString`方法获取原始值，如没有调用`valueOf`方法，如没有抛出异常
+> 1. 当期望`type`为`number`时，会先调用`valueOf`方法获取原始值—>如没有调用`toString`方法—>如没有抛出异常
+> 2. 当期望`type`为`string`时，会先调用`toString`方法获取原始值—>如没有调用`valueOf`方法—>如没有抛出异常
 
 ### 深拷贝与浅拷贝
 
@@ -423,6 +427,17 @@ console.log(JSON.stringify(obj, ['name'], 2))   //  {"name": "mingming"}
 
 > 如父级词法环境没找到，会自动查找变量环境
 
+#### this指向
+
+> this永远指向最后调用它的对象
+
+this的几种情况：
+
+1. 普通函数 — 指向调用它的函数
+2. 箭头函数 — 定义时确认，上级作用域中的this
+3. 构造函数 — this指向实例
+4. call、apply、bind — this指向第一个参数
+
 ### 闭包
 
 > 有权访问另一个函数作用域中变量的函数
@@ -445,3 +460,219 @@ console.log(JSON.stringify(obj, ['name'], 2))   //  {"name": "mingming"}
 + 异步任务分为`宏任务`和`微任务`，任务队列也分为`宏任务队列`和`微任务队列`
   + JS会借助浏览器的线程，当异步任务有结果后，浏览器的线程会将对应的时间推到对应的队列中
   + 当执行栈为空时，会先检查微任务队列，**执行完所有的微任务，之后去执行宏任务**，之后再检查微任务队列，直到所有任务执行完毕（script算宏任务，所以第一个执行的任务时宏任务）
+
+### 创建对象的方式
+
+1. new Object
+
+   ```js
+   const obj = new Object()
+   obj.name = 'ming'
+   ```
+
+2. 字面量
+
+   ```js
+   const obj = {name: 'ming'}
+   ```
+
+3. 工厂函数
+
+   ```js
+   function createObj(name) {
+     const obj = new Object()
+     obj.name = name
+     return obj
+   }
+   const obj = createObj('ming')
+   ```
+
+4. 构造函数
+
+   ```js
+   function Person(name) {
+     this.name = name
+   }
+   const person = new Person('Sunshine_Lin')
+   ```
+
+### JS事件/DOM时间流
+
+DOM时间流分为三个阶段：`事件捕获` —> `目标阶段`—>  `事件冒泡`
+
+> 从文档根节点document出发，向目标节点流去，依次执行对应事件,到达目标节点后执行目标事件，再向根节点流去，依次执行对应事件
+
+#### 事件类型
+
+1. HTML事件
+
+```html
+<!-- Chrome 输出 click -->
+<script>
+    function showMessage(event) {
+        console.log(event.type);
+    }
+</script>
+<input type="button" value="Click Me" onclick="showMessage(event)">
+```
+
+2. DOM 0事件 — 冒泡阶段才会被处理，删除直接赋为`null`即可
+
+```js
+var btn=document.getElementById("btn");
+btn.onclick=function(){
+  console.log(this.id); // 输出 btn
+}
+```
+
+3. DOM 2事件 — `addEventListener` 和 `removeEventListener`
+
+```js
+var btn=document.getElementById("btn");
+var handler = function(){
+  console.log(this.id);
+}
+btn.addEventListener("click", handler, false);
+btn.removeEventListener("click",handler, false);
+```
+
+#### event对象
+
+1. target — 事件触发的节点
+2. currentTarget — 事件绑定的节点
+3. preventDefault — 阻止事件默认行为
+4. stopPropagation — 阻止事件继续传递
+
+#### 事件代理
+
+```js
+<ul id="myLinks">
+    <li id="goSomewhere">Go somewhere</li>
+    <li id="doSomething">Do something</li>
+    <li id="sayHi">Say hi</li>
+</ul>
+<script>
+    var list = document.getElementById("myLinks");
+    EVentUtil.addHandler (list, "click", function (event) {
+        event = EVentUtil.getEvent(event);
+        var target = EVentUtil.gitTarget(event);
+
+        switch(target.id) {
+            case "doSomething":
+                document.title = "I changed the document's title";
+                break;
+            case "goSomewhere":
+                location.href = "https://heycoder.cn/";
+                break;
+            case "sayHi":
+                console.log("hi");
+                break;
+        }
+    })
+</script>
+```
+
+#### load 与 DOMContentLoaded
+
+1. DOMContentLoaded — `文档解析完成` 以及 `内链外链JS` 执行完毕，触发事件
+2. load — 文档内所有内容加载完毕，触发事件
+
+## es6+
+
+### call、apply、bind
+
+> 都是改变this指向，call和apply是立即执行，返回函数的结果，bind是返回函数的复制
+
+1. call — 分开传入参数
+
+```js
+Function.prototype.myCall = function (context, ...arr) {
+    if (context === null || context === undefined) {
+       // 指定为 null 和 undefined 的 this 值会自动指向全局对象(浏览器中为window)
+        context = window 
+    } else {
+        context = Object(context) //值为原始值（数字，字符串，布尔值）的 this 会指向该原始值的实例对象
+    }
+    const specialPrototype = Symbol('特殊属性Symbol') // 用于临时储存函数
+    context[specialPrototype] = this; // 函数的this指向隐式绑定到context上
+    let result = context[specialPrototype](...arr); // 通过隐式绑定执行函数并传递参数
+    delete context[specialPrototype]; // 删除上下文对象的属性
+    return result; // 返回函数执行结果
+};
+```
+
+2. apply — 传数组
+
+```js
+Function.prototype.myApply = function (context) {
+    if (context === null || context === undefined) {
+        context = window 
+      // 指定为 null 和 undefined 的 this 值会自动指向全局对象(浏览器中为window)
+    } else {
+        context = Object(context) //值为原始值（数字，字符串，布尔值）的 this 会指向该原始值的实例对象
+    }
+    // JavaScript权威指南判断是否为类数组对象
+    function isArrayLike(o) {
+        if (o &&                                    // o不是null、undefined等
+            typeof o === 'object' &&                // o是对象
+            isFinite(o.length) &&                   // o.length是有限数值
+            o.length >= 0 &&                        // o.length为非负值
+            o.length === Math.floor(o.length) &&    // o.length是整数
+            o.length < 4294967296)                  // o.length < 2^32
+            return true
+        else
+            return false
+    }
+    const specialPrototype = Symbol('特殊属性Symbol') // 用于临时储存函数
+    context[specialPrototype] = this; // 隐式绑定this指向到context上
+    let args = arguments[1]; // 获取参数数组
+    let result
+    // 处理传进来的第二个参数
+    if (args) {
+        // 是否传递第二个参数
+        if (!Array.isArray(args) && !isArrayLike(args)) {
+            throw new TypeError('myApply 第二个参数不为数组并且不为类数组对象抛出错误');
+        } else {
+            args = Array.from(args) // 转为数组
+            result = context[specialPrototype](...args); // 执行函数并展开数组，传递函数参数
+        }
+    } else {
+        result = context[specialPrototype](); // 执行函数 
+    }
+    delete context[specialPrototype]; // 删除上下文对象的属性
+    return result; // 返回函数执行结果
+};
+```
+
+3. bind — 分开传入参数
+
+```js
+Function.prototype.myBind = function (objThis, ...params) {
+    const thisFn = this; // 存储源函数以及上方的params(函数参数)
+    // 对返回的函数 secondParams 二次传参
+    let fToBind = function (...secondParams) {
+        const isNew = this instanceof fToBind 
+        // this是否是fToBind的实例 也就是返回的fToBind是否通过new调用
+        const context = isNew ? this : Object(objThis) 
+        // new调用就绑定到this上,否则就绑定到传入的objThis上
+        return thisFn.call(context, ...params, ...secondParams); 
+      	// 用call调用源函数绑定this的指向并传递参数,返回执行结果
+    };
+    if (thisFn.prototype) {
+        // 复制源函数的prototype给fToBind 一些情况下函数没有prototype，比如箭头函数
+        fToBind.prototype = Object.create(thisFn.prototype);
+    }
+    return fToBind; // 返回拷贝的函数
+};
+```
+
+
+
+### proxy
+
+### reflect
+
+### promise
+
+
+
